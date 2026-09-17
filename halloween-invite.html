@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Estás invitado/a 🎃</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0d0714;
+    --bg-deep:#150a24;
+    --bg-mid:#1e1035;
+    --panel:#241340;
+    --panel-line:rgba(246,211,101,0.16);
+    --bone:#f3e9d2;
+    --bone-dim:#cdbfa4;
+    --pumpkin:#ff7a29;
+    --pumpkin-deep:#c9541a;
+    --wine:#9c2148;
+    --moon:#f6d365;
+    --ghost:#e7e0ff;
+    --shadow: 0 24px 60px rgba(0,0,0,0.55);
+  }
+  /* This card keeps its Halloween palette in both light and dark system modes —
+     it's a themed invitation, not a UI surface that should shift with viewer preference. */
+  @media (prefers-color-scheme: dark){ :root{ } }
+  :root[data-theme="dark"]{ }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse 70% 45% at 50% 0%, rgba(156,33,72,0.35), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 85% 90%, rgba(255,122,41,0.12), transparent 60%),
+      linear-gradient(180deg, var(--bg-deep), var(--ink) 80%);
+    color:var(--bone);
+    font-family:'Quicksand', -apple-system, sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:28px 14px;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  /* ambient fog + stars, quiet background texture */
+  .stars{position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0.6;}
+  .stars span{position:absolute; width:2px; height:2px; background:var(--ghost); border-radius:50%; opacity:0.5; animation:twinkle 3.5s ease-in-out infinite;}
+  @keyframes twinkle{0%,100%{opacity:0.15;} 50%{opacity:0.75;}}
+
+  .bat{position:fixed; font-size:18px; opacity:0.35; filter:drop-shadow(0 0 4px rgba(0,0,0,0.6)); pointer-events:none; z-index:0; animation:flap 6s ease-in-out infinite;}
+  @keyframes flap{
+    0%{transform:translate(0,0) rotate(0deg);}
+    50%{transform:translate(-18px,-14px) rotate(-8deg);}
+    100%{transform:translate(0,0) rotate(0deg);}
+  }
+
+  .card{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:420px;
+    min-height:640px;
+    background:
+      linear-gradient(180deg, var(--panel), var(--bg-mid));
+    border:1px solid var(--panel-line);
+    border-radius:22px;
+    box-shadow:var(--shadow), inset 0 1px 0 rgba(255,255,255,0.04);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+
+  .ragged-top{
+    height:14px;
+    width:100%;
+    background:
+      linear-gradient(135deg, transparent 50%, var(--panel) 50%) 0 0/14px 14px repeat-x,
+      linear-gradient(45deg, transparent 50%, var(--panel) 50%) 0 0/14px 14px repeat-x;
+    background-color:transparent;
+    opacity:0.9;
+  }
+
+  .screens{
+    position:relative;
+    flex:1;
+    display:flex;
+  }
+  .screen{
+    position:absolute;
+    inset:0;
+    padding:34px 28px 22px;
+    display:flex;
+    flex-direction:column;
+    opacity:0;
+    transform:translateX(24px);
+    pointer-events:none;
+    transition:opacity .45s ease, transform .45s ease;
+  }
+  .screen.active{
+    opacity:1;
+    transform:translateX(0);
+    pointer-events:auto;
+    position:relative;
+  }
+  .screen.leaving{
+    transform:translateX(-24px);
+  }
+
+  .eyebrow{
+    font-size:13px;
+    letter-spacing:0.02em;
+    color:var(--pumpkin);
+    margin:0 0 6px;
+  }
+  h1.title{
+    font-family:'Creepster', cursive;
+    font-weight:400;
+    font-size:44px;
+    line-height:1.05;
+    margin:0 0 10px;
+    color:var(--moon);
+    text-shadow:0 0 18px rgba(246,211,101,0.35), 0 2px 0 rgba(0,0,0,0.4);
+    letter-spacing:0.01em;
+  }
+  h2.q{
+    font-family:'Creepster', cursive;
+    font-weight:400;
+    font-size:30px;
+    line-height:1.15;
+    margin:0 0 8px;
+    color:var(--bone);
+  }
+  p.sub{
+    color:var(--bone-dim);
+    font-size:15.5px;
+    line-height:1.5;
+    margin:0 0 22px;
+  }
+
+  /* Hero pumpkin — the one bold animated moment */
+  .pumpkin-wrap{
+    display:flex;
+    justify-content:center;
+    margin:2px 0 18px;
+  }
+  .pumpkin{
+    font-size:86px;
+    filter:drop-shadow(0 0 22px rgba(255,122,41,0.55)) drop-shadow(0 8px 10px rgba(0,0,0,0.5));
+    animation:glow 3.2s ease-in-out infinite;
+    transform-origin:50% 80%;
+  }
+  @keyframes glow{
+    0%,100%{ filter:drop-shadow(0 0 16px rgba(255,122,41,0.4)) drop-shadow(0 8px 10px rgba(0,0,0,0.5)); transform:rotate(-2deg);}
+    50%{ filter:drop-shadow(0 0 32px rgba(255,122,41,0.75)) drop-shadow(0 8px 10px rgba(0,0,0,0.5)); transform:rotate(2deg);}
+  }
+
+  .field{
+    margin-bottom:16px;
+  }
+  label{
+    display:block;
+    font-size:13.5px;
+    color:var(--bone-dim);
+    margin-bottom:7px;
+  }
+  input[type="text"]{
+    width:100%;
+    background:rgba(13,7,20,0.55);
+    border:1px solid var(--panel-line);
+    border-radius:12px;
+    padding:13px 14px;
+    color:var(--bone);
+    font-family:'Quicksand', sans-serif;
+    font-size:15.5px;
+    outline:none;
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  input[type="text"]::placeholder{ color:rgba(205,191,164,0.45); }
+  input[type="text"]:focus{
+    border-color:var(--pumpkin);
+    box-shadow:0 0 0 3px rgba(255,122,41,0.18);
+  }
+
+  .chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+    margin-bottom:8px;
+  }
+  .chip{
+    border:1px solid var(--panel-line);
+    background:rgba(13,7,20,0.4);
+    color:var(--bone);
+    padding:10px 15px;
+    border-radius:999px;
+    font-family:'Quicksand', sans-serif;
+    font-size:14.5px;
+    font-weight:600;
+    cursor:pointer;
+    transition:transform .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .chip:hover{ transform:translateY(-1px); }
+  .chip.selected{
+    background:linear-gradient(135deg, var(--pumpkin), var(--pumpkin-deep));
+    border-color:transparent;
+    color:#1b0d05;
+  }
+
+  .info-card{
+    background:rgba(13,7,20,0.5);
+    border:1px solid var(--panel-line);
+    border-radius:16px;
+    padding:18px 18px;
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .info-card .icon{ font-size:30px; }
+  .info-card .when b{
+    display:block;
+    font-size:17px;
+    color:var(--moon);
+  }
+  .info-card .when span{
+    font-size:13.5px;
+    color:var(--bone-dim);
+  }
+
+  .spacer{ flex:1; }
+
+  .nav-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:8px;
+  }
+  button.primary{
+    flex:1;
+    background:linear-gradient(135deg, var(--pumpkin), var(--wine));
+    color:var(--bone);
+    border:none;
+    border-radius:14px;
+    padding:15px 18px;
+    font-family:'Quicksand', sans-serif;
+    font-weight:700;
+    font-size:16px;
+    cursor:pointer;
+    box-shadow:0 10px 22px rgba(156,33,72,0.35);
+    transition:transform .15s ease, box-shadow .15s ease, opacity .2s ease;
+  }
+  button.primary:hover{ transform:translateY(-1px); box-shadow:0 14px 26px rgba(156,33,72,0.45); }
+  button.primary:disabled{
+    opacity:0.4;
+    cursor:not-allowed;
+    box-shadow:none;
+    transform:none;
+  }
+  button.ghost{
+    background:transparent;
+    border:1px solid var(--panel-line);
+    color:var(--bone-dim);
+    border-radius:14px;
+    padding:15px 16px;
+    font-family:'Quicksand', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    cursor:pointer;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  button.ghost:hover{ border-color:var(--bone-dim); color:var(--bone); }
+
+  .dots{
+    display:flex;
+    justify-content:center;
+    gap:7px;
+    padding:16px 0 22px;
+  }
+  .dot{
+    width:7px; height:7px; border-radius:50%;
+    background:rgba(243,233,210,0.25);
+    transition:background .2s ease, transform .2s ease;
+  }
+  .dot.on{ background:var(--pumpkin); transform:scale(1.25); }
+
+  .summary-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .summary-row{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:12px 14px;
+    background:rgba(13,7,20,0.45);
+    border:1px solid var(--panel-line);
+    border-radius:12px;
+    font-size:14.5px;
+  }
+  .summary-row .k{ color:var(--bone-dim); }
+  .summary-row .v{ color:var(--bone); font-weight:600; text-align:right; }
+
+  .whatsapp-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    width:100%;
+    text-decoration:none;
+    background:linear-gradient(135deg,#25D366,#128C4A);
+    color:#06210f;
+    font-weight:700;
+    font-size:16px;
+    padding:15px 18px;
+    border-radius:14px;
+    box-shadow:0 10px 22px rgba(37,211,102,0.3);
+  }
+
+  .sent-check{
+    text-align:center;
+    margin-top:14px;
+    font-size:13.5px;
+    color:var(--bone-dim);
+    min-height:18px;
+  }
+
+  @media (max-width:400px){
+    .card{ min-height:600px; border-radius:16px; }
+    h1.title{ font-size:38px; }
+    h2.q{ font-size:26px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<span class="bat" style="top:8%; left:12%;">🦇</span>
+<span class="bat" style="top:16%; right:10%; animation-delay:1.4s;">🦇</span>
+<span class="bat" style="top:70%; left:6%; animation-delay:2.6s;">🦇</span>
+
+<div class="card">
+  <div class="ragged-top"></div>
+  <div class="screens" id="screens">
+
+    <!-- 1. Bienvenida -->
+    <section class="screen active" data-screen="0">
+      <p class="eyebrow">Halloween · 31 de octubre</p>
+      <div class="pumpkin-wrap"><div class="pumpkin">🎃</div></div>
+      <h1 class="title">Estás invitado/a</h1>
+      <p class="sub">Una noche de disfraces, sustos y dulces. Antes de nada, dinos quién se atreve a venir.</p>
+      <div class="field">
+        <label for="nombre">Tu nombre</label>
+        <input type="text" id="nombre" placeholder="¿Cómo te llamas?" autocomplete="off">
+      </div>
+      <div class="spacer"></div>
+      <div class="nav-row">
+        <button class="primary" id="btn-start">Entrar, si te atreves 👻</button>
+      </div>
+    </section>
+
+    <!-- 2. Ubicación -->
+    <section class="screen" data-screen="1">
+      <p class="eyebrow">Pregunta 1 de 3</p>
+      <h2 class="q">¿Dónde te gustaría que fuera la fiesta?</h2>
+      <p class="sub">Elige una opción o proponnos la tuya.</p>
+      <div class="chips" id="chips-lugar">
+        <div class="chip" data-value="Mi casa">🏠 Una casa</div>
+        <div class="chip" data-value="Bar temático">🍸 Bar temático</div>
+        <div class="chip" data-value="Jardín / terraza">🌒 Jardín o terraza</div>
+        <div class="chip" data-value="Salón alquilado">🕯️ Salón alquilado</div>
+      </div>
+      <div class="field">
+        <label for="lugar-otro">O escribe tu propia idea</label>
+        <input type="text" id="lugar-otro" placeholder="Ej: un bosque embrujado…" autocomplete="off">
+      </div>
+      <div class="spacer"></div>
+      <div class="nav-row">
+        <button class="ghost" data-back>Atrás</button>
+        <button class="primary" id="btn-to-2">Siguiente</button>
+      </div>
+    </section>
+
+    <!-- 3. Hora y asistencia -->
+    <section class="screen" data-screen="2">
+      <p class="eyebrow">Pregunta 2 de 3</p>
+      <h2 class="q">¿Nos acompañarás?</h2>
+      <div class="info-card">
+        <div class="icon">🕙</div>
+        <div class="when">
+          <b>Sábado 31 de octubre</b>
+          <span>22:00h · no faltes</span>
+        </div>
+      </div>
+      <div class="chips" id="chips-asistencia">
+        <div class="chip" data-value="Sí, allí estaré">✅ Sí, allí estaré</div>
+        <div class="chip" data-value="Tal vez">🤔 Tal vez</div>
+        <div class="chip" data-value="No podré ir">❌ No podré ir</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="nav-row">
+        <button class="ghost" data-back>Atrás</button>
+        <button class="primary" id="btn-to-3" disabled>Siguiente</button>
+      </div>
+    </section>
+
+    <!-- 4. Disfraz -->
+    <section class="screen" data-screen="3">
+      <p class="eyebrow">Pregunta 3 de 3</p>
+      <h2 class="q">¿De qué te disfrazarás?</h2>
+      <p class="sub">Si aún no lo sabes, danos una pista.</p>
+      <div class="chips" id="chips-disfraz">
+        <div class="chip" data-value="Terrorífico">🧟 Terrorífico</div>
+        <div class="chip" data-value="Gracioso">🤡 Gracioso</div>
+        <div class="chip" data-value="Clásico">🧛 Clásico</div>
+        <div class="chip" data-value="Sorpresa">🎭 Sorpresa</div>
+      </div>
+      <div class="field">
+        <label for="disfraz-otro">Cuéntanos más (opcional)</label>
+        <input type="text" id="disfraz-otro" placeholder="Ej: vampiro victoriano…" autocomplete="off">
+      </div>
+      <div class="spacer"></div>
+      <div class="nav-row">
+        <button class="ghost" data-back>Atrás</button>
+        <button class="primary" id="btn-to-4">Siguiente</button>
+      </div>
+    </section>
+
+    <!-- 5. Resumen y envío -->
+    <section class="screen" data-screen="4">
+      <p class="eyebrow">Último paso</p>
+      <h2 class="q">Revisa tu respuesta</h2>
+      <p class="sub">Pulsa el botón para enviársela a la anfitriona por WhatsApp.</p>
+      <div class="summary-list" id="summary"></div>
+      <div class="spacer"></div>
+      <a class="whatsapp-btn" id="btn-whatsapp" href="#" target="_blank" rel="noopener">Enviar respuesta por WhatsApp</a>
+      <div class="sent-check" id="sent-note">Se abrirá WhatsApp con tu respuesta ya escrita.</div>
+      <div class="nav-row" style="margin-top:10px;">
+        <button class="ghost" data-back>Atrás</button>
+      </div>
+    </section>
+
+  </div>
+  <div class="dots" id="dots">
+    <span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---- CONFIG: edita aquí si cambian los datos de la fiesta ----
+  const HOST_WHATSAPP = "34635678059"; // sin '+' ni espacios, formato internacional
+  const PARTY_WHEN = "Sábado 31 de octubre, 22:00h";
+  // ----------------------------------------------------------------
+
+  const screens = Array.from(document.querySelectorAll('.screen'));
+  const dots = Array.from(document.querySelectorAll('.dot'));
+  let current = 0;
+  const state = { nombre:'', lugar:'', asistencia:'', disfraz:'' };
+
+  function goTo(index){
+    screens[current].classList.remove('active');
+    current = index;
+    screens[current].classList.add('active','leaving');
+    requestAnimationFrame(()=> screens[current].classList.remove('leaving'));
+    dots.forEach((d,i)=> d.classList.toggle('on', i===current));
+    if(current === 4) buildSummary();
+  }
+
+  function setupChips(containerId, key, onChange){
+    const container = document.getElementById(containerId);
+    if(!container) return;
+    container.querySelectorAll('.chip').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        container.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
+        chip.classList.add('selected');
+        state[key] = chip.dataset.value;
+        if(onChange) onChange();
+      });
+    });
+  }
+
+  // Screen 0
+  document.getElementById('btn-start').addEventListener('click', ()=>{
+    const val = document.getElementById('nombre').value.trim();
+    state.nombre = val || 'Un invitado misterioso';
+    goTo(1);
+  });
+
+  // Screen 1
+  setupChips('chips-lugar', 'lugar');
+  const lugarOtro = document.getElementById('lugar-otro');
+  lugarOtro.addEventListener('input', ()=>{
+    if(lugarOtro.value.trim()){
+      document.querySelectorAll('#chips-lugar .chip').forEach(c=>c.classList.remove('selected'));
+      state.lugar = lugarOtro.value.trim();
+    }
+  });
+  document.getElementById('btn-to-2').addEventListener('click', ()=>{
+    if(!state.lugar) state.lugar = 'Sin preferencia';
+    goTo(2);
+  });
+
+  // Screen 2
+  const btnTo3 = document.getElementById('btn-to-3');
+  setupChips('chips-asistencia', 'asistencia', ()=>{ btnTo3.disabled = false; });
+  btnTo3.addEventListener('click', ()=> goTo(3));
+
+  // Screen 3
+  setupChips('chips-disfraz', 'disfraz');
+  const disfrazOtro = document.getElementById('disfraz-otro');
+  disfrazOtro.addEventListener('input', ()=>{
+    if(disfrazOtro.value.trim()) state.disfraz = disfrazOtro.value.trim();
+  });
+  document.getElementById('btn-to-4').addEventListener('click', ()=>{
+    if(!state.disfraz) state.disfraz = 'Sorpresa';
+    goTo(4);
+  });
+
+  // Back buttons
+  document.querySelectorAll('[data-back]').forEach(btn=>{
+    btn.addEventListener('click', ()=> goTo(Math.max(0, current-1)));
+  });
+
+  function buildSummary(){
+    const rows = [
+      ['Nombre', state.nombre],
+      ['Lugar preferido', state.lugar],
+      ['Asistencia', state.asistencia || 'Sin responder'],
+      ['Disfraz', state.disfraz]
+    ];
+    const el = document.getElementById('summary');
+    el.innerHTML = rows.map(([k,v])=>
+      `<div class="summary-row"><span class="k">${k}</span><span class="v">${escapeHtml(v)}</span></div>`
+    ).join('');
+
+    const text =
+`🎃 Confirmación fiesta de Halloween
+Nombre: ${state.nombre}
+Lugar preferido: ${state.lugar}
+Asistencia: ${state.asistencia || 'Sin responder'}
+Disfraz: ${state.disfraz}
+Fecha: ${PARTY_WHEN}`;
+
+    const link = `https://wa.me/${HOST_WHATSAPP}?text=${encodeURIComponent(text)}`;
+    document.getElementById('btn-whatsapp').setAttribute('href', link);
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  // ambient stars
+  const starsEl = document.getElementById('stars');
+  for(let i=0;i<26;i++){
+    const s = document.createElement('span');
+    s.style.left = Math.random()*100 + '%';
+    s.style.top = Math.random()*100 + '%';
+    s.style.animationDelay = (Math.random()*3.5) + 's';
+    starsEl.appendChild(s);
+  }
+})();
+</script>
+</body>
+</html>

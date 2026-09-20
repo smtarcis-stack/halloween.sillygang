@@ -349,7 +349,7 @@
 
     <!-- 1. Bienvenida -->
     <section class="screen active" data-screen="0">
-      <p class="eyebrow">Halloween · 31 de octubre</p>
+      <p class="eyebrow">Halloween 🎃</p>
       <div class="pumpkin-wrap"><div class="pumpkin">🎃</div></div>
       <h1 class="title">Estás invitado/a</h1>
       <p class="sub">Una noche de disfraces, sustos y dulces. Antes de nada, dinos quién se atreve a venir.</p>
@@ -385,21 +385,21 @@
       </div>
     </section>
 
-    <!-- 3. Hora y asistencia -->
+    <!-- 3. Cuándo -->
     <section class="screen" data-screen="2">
       <p class="eyebrow">Pregunta 2 de 3</p>
-      <h2 class="q">¿Nos acompañarás?</h2>
-      <div class="info-card">
-        <div class="icon">🕙</div>
-        <div class="when">
-          <b>Sábado 31 de octubre</b>
-          <span>22:00h · no faltes</span>
-        </div>
+      <h2 class="q">¿Cuándo te viene mejor?</h2>
+      <p class="sub">Aún no hay fecha cerrada — decidimos entre todos.</p>
+      <div class="chips" id="chips-dia">
+        <div class="chip" data-value="Viernes 30 de octubre">🌙 Viernes 30</div>
+        <div class="chip" data-value="Sábado 31 de octubre">🎃 Sábado 31</div>
+        <div class="chip" data-value="Domingo 1 de noviembre">👻 Domingo 1</div>
+        <div class="chip" data-value="Cualquier día me vale">🙌 Cualquier día</div>
+        <div class="chip" data-value="No podré ir esta vez">😢 No podré ir</div>
       </div>
-      <div class="chips" id="chips-asistencia">
-        <div class="chip" data-value="Sí, allí estaré">✅ Sí, allí estaré</div>
-        <div class="chip" data-value="Tal vez">🤔 Tal vez</div>
-        <div class="chip" data-value="No podré ir">❌ No podré ir</div>
+      <div class="field">
+        <label for="hora-pref">¿A qué hora te viene mejor? (opcional)</label>
+        <input type="text" id="hora-pref" placeholder="Ej: a partir de las 21h…" autocomplete="off">
       </div>
       <div class="spacer"></div>
       <div class="nav-row">
@@ -434,7 +434,7 @@
     <section class="screen" data-screen="4">
       <p class="eyebrow">Último paso</p>
       <h2 class="q">Revisa tu respuesta</h2>
-      <p class="sub">Pulsa el botón para enviársela a la anfitriona por WhatsApp.</p>
+      <p class="sub">Tu preferencia de fecha ayudará a decidir cuándo la celebramos. Pulsa el botón para enviársela a la anfitriona por WhatsApp.</p>
       <div class="summary-list" id="summary"></div>
       <div class="spacer"></div>
       <a class="whatsapp-btn" id="btn-whatsapp" href="#" target="_blank" rel="noopener">Enviar respuesta por WhatsApp</a>
@@ -454,13 +454,12 @@
 (function(){
   // ---- CONFIG: edita aquí si cambian los datos de la fiesta ----
   const HOST_WHATSAPP = "34635678059"; // sin '+' ni espacios, formato internacional
-  const PARTY_WHEN = "Sábado 31 de octubre, 22:00h";
   // ----------------------------------------------------------------
 
   const screens = Array.from(document.querySelectorAll('.screen'));
   const dots = Array.from(document.querySelectorAll('.dot'));
   let current = 0;
-  const state = { nombre:'', lugar:'', asistencia:'', disfraz:'' };
+  const state = { nombre:'', lugar:'', dia:'', horaPref:'', disfraz:'' };
 
   function goTo(index){
     screens[current].classList.remove('active');
@@ -507,7 +506,9 @@
 
   // Screen 2
   const btnTo3 = document.getElementById('btn-to-3');
-  setupChips('chips-asistencia', 'asistencia', ()=>{ btnTo3.disabled = false; });
+  setupChips('chips-dia', 'dia', ()=>{ btnTo3.disabled = false; });
+  const horaPref = document.getElementById('hora-pref');
+  horaPref.addEventListener('input', ()=>{ state.horaPref = horaPref.value.trim(); });
   btnTo3.addEventListener('click', ()=> goTo(3));
 
   // Screen 3
@@ -530,7 +531,8 @@
     const rows = [
       ['Nombre', state.nombre],
       ['Lugar preferido', state.lugar],
-      ['Asistencia', state.asistencia || 'Sin responder'],
+      ['Día preferido', state.dia || 'Sin responder'],
+      ['Hora preferida', state.horaPref || 'Sin preferencia'],
       ['Disfraz', state.disfraz]
     ];
     const el = document.getElementById('summary');
@@ -539,12 +541,12 @@
     ).join('');
 
     const text =
-`🎃 Confirmación fiesta de Halloween
+`🎃 Respuesta fiesta de Halloween
 Nombre: ${state.nombre}
 Lugar preferido: ${state.lugar}
-Asistencia: ${state.asistencia || 'Sin responder'}
-Disfraz: ${state.disfraz}
-Fecha: ${PARTY_WHEN}`;
+Día preferido: ${state.dia || 'Sin responder'}
+Hora preferida: ${state.horaPref || 'Sin preferencia'}
+Disfraz: ${state.disfraz}`;
 
     const link = `https://wa.me/${HOST_WHATSAPP}?text=${encodeURIComponent(text)}`;
     document.getElementById('btn-whatsapp').setAttribute('href', link);
